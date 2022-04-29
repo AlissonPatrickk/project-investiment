@@ -1,116 +1,120 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
+  <div class="q-pa-md" id="container">
+    <q-table
+      grid
+      title="Employees"
+      :title-class="'text-h2'"
+      :rows="rows"
+      :columns="columns"
+      row-key="name"
+      :filter="filter"
+      card-class="bg-grey-8 text-white"
+      :rows-per-page-options="[0]"
+      :pagination="pagination"
     >
-      <q-list>
-        <q-item-label
-          header
+      <template v-slot:top-right>
+        <q-input
+          class="filter-search"
+          borderless
+          dense
+          debounce="100"
+          v-model="filter"
+          placeholder="Search"
         >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+    </q-table>
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { ref } from "vue";
+import api from "../services/api";
 
-const linksList = [
+const columns = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+    name: "nome",
+    required: true,
+    label: "Nome",
+    align: "left",
+    field: (row) => row.name,
+    format: (val) => `${val}`,
   },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
+  { name: "username", align: "center", label: "UserName", field: "username" },
+  { name: "phone", label: "Phone", field: "phone" },
+  { name: "email", label: "Email", field: "email" },
+  { name: "website", label: "Website", field: "website" },
+  { name: "company", label: "Company", field: (row) => row.company.name },
+  { name: "company", label: "Catch Phrase", field: (row) => row.company.catchPhrase },
+  { name: "address", label: "Address", field: (row) => row.address.street },
+  { name: "address", label: "City", field: (row) => row.address.city },
+  { name: "address", label: "Suite", field: (row) => row.address.suite },
+];
 
-export default defineComponent({
-  name: 'MainLayout',
-
-  components: {
-    EssentialLink
+const rows = [
+  {
+    name: "",
+    username: "",
+    phone: "",
+    email: "",
+    website: "",
+    address: {
+      street: "",
+      suite: "",
+      city: "",
+    },
+    company: {
+      name: "",
+      catchPhrase: "",
+    },
   },
+];
 
-  setup () {
-    const leftDrawerOpen = ref(false)
+export default {
 
+  data() {
     return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
-    }
-  }
-})
+      filter: ref(""),
+      columns,
+      rows,
+      pagination: {
+        page: 1,
+        rowsPerPage: 0,
+      },
+    };
+  },
+
+  mounted() {
+    api.get("").then((res) => {
+      this.rows = res.data;
+      console.log(res);
+    });
+  },
+};
 </script>
+
+<style scoped>
+#container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-content: center;
+  justify-items: center;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+.filter-search {
+  width: 320px;
+  background-color: aliceblue;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 30px 0 15px 0;
+}
+.cardInfo {
+  background-color: gray;
+}
+
+</style>
